@@ -409,7 +409,7 @@
     grid.innerHTML = list.map(p => {
       const low = p.stock <= 1;
       return `<article class="card">
-        ${p.foto ? `<div class="card-shot has-photo"><img class="card-img" src="img/productos/${p.foto}-800.webp" srcset="img/productos/${p.foto}-480.webp 480w, img/productos/${p.foto}-800.webp 800w" sizes="(max-width: 560px) 92vw, 270px" width="800" height="1000" loading="lazy" decoding="async" alt="${esc(p.brand + " " + p.model)}"></div>` : `<div class="card-shot">${carSvg}${p.type ? `<span class="type-tag">${p.type}</span>` : ""}<span class="ph-label">Foto próximamente</span></div>`}
+        ${p.foto ? `<div class="card-shot has-photo"><img class="card-img" src="${p.foto}-800.webp" srcset="${p.foto}-480.webp 480w, ${p.foto}-800.webp 800w" sizes="(max-width: 560px) 92vw, 270px" width="800" height="1000" loading="lazy" decoding="async" alt="${esc(p.brand + " " + p.model)}"></div>` : `<div class="card-shot">${carSvg}${p.type ? `<span class="type-tag">${p.type}</span>` : ""}<span class="ph-label">Foto próximamente</span></div>`}
         <div class="card-body">
           <div class="card-top">
             <span class="brand-pill" data-brand="${p.brandKey}">${p.brand}</span>
