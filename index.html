@@ -193,7 +193,8 @@
 
   .card.reveal { animation: cardIn .5s cubic-bezier(.2,.8,.2,1) both; animation-delay: var(--d, 0s); }
   @keyframes cardIn { from { transform: translateY(18px); opacity: .001; } to { transform: none; opacity: 1; } }
-  @media (hover: none) { .card { transition: transform .15s ease; } .card:active { transform: scale(.985); } }
+  .sheet { overscroll-behavior: contain; }
+  .sheet-panel { overscroll-behavior: contain; }
   @media (hover: hover) and (pointer: fine) {
     .card-shot::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .2s;
       background: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), rgba(255,255,255,.12), transparent 55%); }
@@ -364,6 +365,19 @@
   let toastT;
   function showToast(msg) { toast.textContent = msg; toast.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { toast.hidden = true; }, 4000); }
   const sheet = document.getElementById("sheet");
+  // Bloquea el scroll de la página mientras hay una ventana abierta (incluye iPhone)
+  let lockedY = null;
+  function syncScroll() {
+    const open = !sheet.hidden || !document.getElementById("detail").hidden;
+    const b = document.body;
+    if (open && lockedY === null) {
+      lockedY = window.scrollY;
+      b.style.position = "fixed"; b.style.top = -lockedY + "px"; b.style.left = "0"; b.style.right = "0"; b.style.width = "100%";
+    } else if (!open && lockedY !== null) {
+      b.style.position = b.style.top = b.style.left = b.style.right = b.style.width = "";
+      window.scrollTo(0, lockedY); lockedY = null;
+    }
+  }
   const sheetMsg = document.getElementById("sheet-msg");
   let lastFocus = null;
   let cur = null, qty = 1;
@@ -389,12 +403,12 @@
     document.getElementById("qty-max").textContent = p.stock + " disponibles";
     lastFocus = document.activeElement;
     updateSheet();
-    sheet.hidden = false;
+    sheet.hidden = false; syncScroll();
     stepCopy.focus();
   }
   qtyMinus.addEventListener("click", () => { if (qty > 1) { qty--; updateSheet(); } });
   qtyPlus.addEventListener("click", () => { if (qty < cur.stock) { qty++; updateSheet(); } });
-  function closeSheet() { sheet.hidden = true; if (lastFocus) lastFocus.focus(); }
+  function closeSheet() { sheet.hidden = true; syncScroll(); if (lastFocus) lastFocus.focus({ preventScroll: true }); }
   function copyMsg() {
     try {
       return navigator.clipboard.writeText(sheetMsg.value).then(() => true, () => false);
@@ -430,11 +444,11 @@
     document.getElementById("detail-cond").textContent = p.cond;
     document.getElementById("detail-price").innerHTML = `<small>RD$</small>${fmt.format(p.price)}`;
     detailFocus = document.activeElement;
-    detail.hidden = false;
+    detail.hidden = false; syncScroll();
     detail.querySelector(".detail-panel").scrollTop = 0;
     document.getElementById("detail-order").focus();
   }
-  function closeDetail() { detail.hidden = true; if (detailFocus) detailFocus.focus(); }
+  function closeDetail() { detail.hidden = true; syncScroll(); if (detailFocus) detailFocus.focus({ preventScroll: true }); }
   document.getElementById("detail-order").addEventListener("click", () => {
     detail.hidden = true;
     openSheet(detailCur);
